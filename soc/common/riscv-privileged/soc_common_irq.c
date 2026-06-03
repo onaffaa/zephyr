@@ -78,7 +78,17 @@ void arch_irq_enable(unsigned int irq)
 #ifdef CONFIG_RISCV_S_MODE
 	ie = csr_read_set(sie, 1 << irq);
 #else
+#if defined(CONFIG_RISCV_ISA_RV32I) || defined(CONFIG_RISCV_ISA_RV32E) ||                          \
+	defined(RISCV_ISA_EXT_SMAIA)
+	/* mie is 64 bits in AIA, and upper 32 bits are accessed using mieh CSR for RV32 */
+	if (irq >= 32) {
+		ie = csr_read_set(mieh, 1 << (irq - 32));
+	} else {
+		ie = csr_read_set(mie, 1 << irq);
+	}
+#else
 	ie = csr_read_set(mie, 1 << irq);
+#endif
 #endif
 }
 
@@ -109,7 +119,17 @@ void arch_irq_disable(unsigned int irq)
 #ifdef CONFIG_RISCV_S_MODE
 	ie = csr_read_clear(sie, 1 << irq);
 #else
+#if defined(CONFIG_RISCV_ISA_RV32I) || defined(CONFIG_RISCV_ISA_RV32E) ||                          \
+	defined(RISCV_ISA_EXT_SMAIA)
+	/* mie is 64 bits in AIA, and upper 32 bits are accessed using mieh CSR for RV32 */
+	if (irq >= 32) {
+		ie = csr_read_clear(mieh, 1 << (irq - 32));
+	} else {
+		ie = csr_read_clear(mie, 1 << irq);
+	}
+#else
 	ie = csr_read_clear(mie, 1 << irq);
+#endif
 #endif
 }
 
@@ -134,7 +154,19 @@ int arch_irq_is_enabled(unsigned int irq)
 #ifdef CONFIG_RISCV_S_MODE
 	ie = csr_read(sie);
 #else
+#if defined(CONFIG_RISCV_ISA_RV32I) || defined(CONFIG_RISCV_ISA_RV32E) ||                          \
+	defined(RISCV_ISA_EXT_SMAIA)
+	/* mie is 64 bits in AIA, and upper 32 bits are accessed using mieh CSR for RV32. */
+	if (irq >= 32) {
+		ie = csr_read(mieh);
+		/* Adjust irq to bit position within upper register */
+		irq -= 32;
+	} else {
+		ie = csr_read(mie);
+	}
+#else
 	ie = csr_read(mie);
+#endif
 #endif
 
 	return !!(ie & (1 << irq));
@@ -181,6 +213,13 @@ __weak void soc_interrupt_init(void)
 #else
 	csr_write(mie, 0);
 	csr_write(mip, 0);
+#if defined(CONFIG_RISCV_ISA_RV32I) || defined(CONFIG_RISCV_ISA_RV32E) ||                          \
+	defined(RISCV_ISA_EXT_SMAIA)
+	/* mie/mip are 64 bits in AIA, and upper 32 bits are accessed using mieh/miph CSR for RV32
+	 */
+	csr_write(mieh, 0);
+	csr_write(miph, 0);
+#endif
 #endif
 }
 #endif
