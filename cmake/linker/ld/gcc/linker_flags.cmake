@@ -9,6 +9,9 @@ endif()
 
 check_set_linker_property(TARGET linker APPEND PROPERTY gprof -pg)
 
+# Position Independent Executable (PIE) and no dynamic linker
+set_property(TARGET linker PROPERTY position_independent_elf "${LINKERFLAGPREFIX},-pie ${LINKERFLAGPREFIX},--no-dynamic-linker")
+
 # GCC 11 by default emits DWARF version 5 which cannot be parsed by
 # pyelftools. Can be removed once pyelftools supports v5.
 add_link_options(-gdwarf-4)
