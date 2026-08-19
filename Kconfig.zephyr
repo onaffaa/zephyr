@@ -545,6 +545,13 @@ config LTO_SINGLE_THREADED
 	  LTO. See the following issue for more info:
 	  https://github.com/zephyrproject-rtos/sdk-ng/issues/1038
 
+config PIC_OPTIONS
+	bool "Generate Position Independent ELF"
+	help
+	  This option enables Position Independent ELF. Requires a CPULLVM toolchain
+	  (github.com/qualcomm/cpullvm-toolchain) due to position independent
+	  executable compilation ("-pie") not being supported.
+
 config COMPILER_WARNINGS_AS_ERRORS
 	bool "Treat warnings as errors"
 	help
