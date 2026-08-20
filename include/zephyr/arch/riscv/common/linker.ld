@@ -130,22 +130,52 @@ ENTRY(CONFIG_KERNEL_ENTRY)
 SECTIONS
     {
 
+#ifndef CONFIG_PIC_OPTIONS
 #include <zephyr/linker/rel-sections.ld>
+#endif
 #include <zephyr/linker/llext-sections.ld>
 
     /*
      * The .plt and .iplt are here according to
      * 'riscv32-zephyr-elf-ld --verbose', before text section.
      */
-    SECTION_PROLOGUE(.plt,,)
+#ifndef CONFIG_PIC_OPTIONS
+    SECTION_PROLOGUE(.plt,,ALIGN(0x1000))
 	{
 		*(.plt)
+        *(.got)
+		*(.got.plt)
 	}
 
     SECTION_PROLOGUE(.iplt,,)
 	{
 		*(.iplt)
 	}
+#else
+    SECTION_PROLOGUE(.got,, ALIGN(0x1000))
+    {
+        __got_start = .;
+        *(.got.plt) *(.got)
+        __got_end = .;
+    }
+
+    SECTION_PROLOGUE(.rela.plt,, ALIGN(0x1000))
+    {
+        __rel_plt_start = .;
+        *(.rela.plt*)
+        __rel_plt_end = .;
+        *(.plt)
+    }
+
+    SECTION_PROLOGUE(.rela.dyn,, ALIGN(0x1000))
+    {
+        __rel_dyn_start = .;
+        KEEP(*(.rela*))
+    }
+    __rel_dyn_end = .;
+
+    /DISCARD/ : { *(.dynamic*) }
+#endif
 
     GROUP_START(ROMABLE_REGION)
     __rom_region_start = ROM_BASE;
