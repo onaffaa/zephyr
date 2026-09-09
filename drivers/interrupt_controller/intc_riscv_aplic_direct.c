@@ -209,6 +209,11 @@ int aplic_direct_init(const struct device *dev)
 		wr32(cfg->base, aplic_sourcecfg_off(src_num), APLIC_SM_INACTIVE);
 	}
 
+	/* Apply devicetree-defined delegation on top of the inactive baseline.
+	 * This is boot-time-only configuration; see riscv_aplic_config_src().
+	 */
+	aplic_apply_delegation(dev);
+
 	for (uint32_t cpu = 0; cpu < arch_num_cpus(); cpu++) {
 		/* idelivery = 0b1 -- Interrupt delivery is enabled */
 		wr32(cfg->base, aplic_idelivery_off(cpu), APLIC_IDC_IDELIVERY_ENABLE);

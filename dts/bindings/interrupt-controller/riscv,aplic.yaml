@@ -40,6 +40,23 @@ properties:
       When present the driver operates in MSI mode; when absent
       direct delivery mode is assumed.
 
+  riscv,children:
+    type: phandle-array
+    specifier-space: aplic-child-index
+    description: |
+      A list of child APLIC domains for the given APLIC domain.
+      Each child APLIC domain is assigned a child index in increasing order,
+      with the first child APLIC domain assigned child index 0.
+
+  riscv,delegation:
+    type: phandle-array
+    specifier-space: aplic-delegation
+    description: |
+      An interrupt delegation list where each entry is a triple consisting of
+      child APLIC domain phandle, first interrupt number of the parent APLIC
+      domain, and last interrupt number of the parent APLIC domain.
+      Requires riscv,children property to be present.
+
 interrupt-cells:
   - irq
   - priority

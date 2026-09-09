@@ -20,6 +20,10 @@ typedef void (*riscv_aplic_irq_config_func_t)(void);
 struct aplic_cfg {
 	uintptr_t base;
 	uint32_t num_sources;
+	const uint32_t *children;
+	uint32_t num_children;
+	const uint32_t *delegations;
+	uint32_t num_delegations;
 #ifdef CONFIG_RISCV_APLIC_MSI
 	uint32_t imsic_addr;
 #endif
@@ -56,5 +60,17 @@ static inline void wr32(uintptr_t base, uint32_t off, uint32_t v)
  */
 int aplic_msi_init(const struct device *dev);
 #endif /* CONFIG_RISCV_APLIC_MSI */
+
+/**
+ * @brief Apply the interrupt delegation ranges parsed from devicetree.
+ *
+ * Writes the delegate bit and child-domain index into sourcecfg for every
+ * source covered by cfg->delegations. Called once from aplic_msi_init() /
+ * aplic_direct_init(); delegation topology is fixed at boot and is not
+ * meant to be reconfigured while the domain is running.
+ *
+ * @param dev APLIC device
+ */
+void aplic_apply_delegation(const struct device *dev);
 
 #endif /* ZEPHYR_DRIVERS_INTERRUPT_CONTROLLER_INTC_RISCV_APLIC_PRIV_H_ */

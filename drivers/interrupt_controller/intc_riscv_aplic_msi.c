@@ -143,6 +143,11 @@ int aplic_msi_init(const struct device *dev)
 		wr32(cfg->base, APLIC_SMSIADDRCFGH, msi_geom);
 	}
 
+	/* Apply devicetree-defined delegation before enabling the domain.
+	 * This is boot-time-only configuration; see riscv_aplic_config_src().
+	 */
+	aplic_apply_delegation(dev);
+
 	/* Enable MSI mode + IE in DOMAINCFG */
 	riscv_aplic_domain_enable(dev, true);
 

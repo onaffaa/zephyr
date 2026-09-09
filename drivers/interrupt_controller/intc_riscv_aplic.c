@@ -57,7 +57,13 @@ int riscv_aplic_config_src(const struct device *dev, unsigned int src, unsigned 
 	uintptr_t off = aplic_sourcecfg_off(src);
 
 	if ((src_cfg & APLIC_SOURCECFG_D_BIT) == APLIC_SOURCECFG_D_BIT) {
-		/* Delegrate interrupt to specified child domain index */
+		/* Delegate interrupt to specified child domain index.
+		 *
+		 * The AIA spec allows sourcecfg's D bit and Child Index to be rewritten after boot.
+		 * There is no caller that reconfigures delegation at runtime; adding one would also
+		 * need to disable the source first and confirm it is not pending so the move to the
+		 * new child domain cannot race an interrupt still being delivered under the old one.
+		 */
 		k_spinlock_key_t key = k_spin_lock(&data->lock);
 
 		wr32(cfg->base, off,
@@ -89,6 +95,28 @@ int riscv_aplic_enable_src(const struct device *dev, unsigned int src, bool enab
 
 	wr32(cfg->base, enable ? APLIC_SETIENUM : APLIC_CLRIENUM, src);
 	return 0;
+}
+
+void aplic_apply_delegation(const struct device *dev)
+{
+	const struct aplic_cfg *cfg = dev->config;
+
+	/* Each entry is a (child_index, first_irq, last_irq) triple. Applying
+	 * this here, once at init, matches the boot-time-only delegation
+	 * model documented on the delegate branch of riscv_aplic_config_src().
+	 */
+	for (uint32_t i = 0; i < cfg->num_delegations; i++) {
+		uint32_t child_index = cfg->delegations[3U * i];
+		uint32_t first_irq = cfg->delegations[3U * i + 1U];
+		uint32_t last_irq = cfg->delegations[3U * i + 2U];
+
+		for (uint32_t src = first_irq; src <= last_irq; src++) {
+			riscv_aplic_config_src(
+				dev, src,
+				APLIC_SOURCECFG_D_BIT |
+					(child_index & APLIC_SOURCECFG_CHILD_INDEX_MASK));
+		}
+	}
 }
 
 static int aplic_init(const struct device *dev)
@@ -134,6 +162,10 @@ uint32_t riscv_aplic_get_num_sources(const struct device *dev)
 		.max_prio = DT_INST_PROP(inst, riscv_max_priority),                                \
 		.irq_config_func = aplic_irq_config_func_##inst,                                   \
 		.isr_table = &_sw_isr_table[INTC_INST_ISR_TBL_OFFSET(inst)],                       \
+		.children = DT_INST_PROP_OR(inst, riscv_children, NULL),                           \
+		.num_children = DT_INST_PROP_LEN_OR(inst, riscv_children, 0),                      \
+		.delegations = DT_INST_PROP_OR(inst, riscv_delegation, NULL),                      \
+		.num_delegations = DT_INST_PROP_LEN_OR(inst, riscv_delegation, 0),                 \
 	};                                                                                         \
 	APLIC_INTC_IRQ_FUNC_DEFINE(inst)                                                           \
 	DEVICE_DT_INST_DEFINE(inst, aplic_init, NULL, &aplic_data_##inst, &aplic_cfg_##inst,       \
@@ -146,7 +178,11 @@ uint32_t riscv_aplic_get_num_sources(const struct device *dev)
 		.base = DT_INST_REG_ADDR(inst),                                                    \
 		.num_sources = DT_INST_PROP(inst, riscv_num_sources),                              \
 		IF_ENABLED(CONFIG_RISCV_APLIC_MSI,                                                 \
-			(.imsic_addr = DT_REG_ADDR(DT_INST_PHANDLE(inst, msi_parent)),)) };        \
+			(.imsic_addr = DT_REG_ADDR(DT_INST_PHANDLE(inst, msi_parent)),))             \
+		.num_children = DT_INST_PROP_LEN_OR(inst, riscv_children, 0),          \
+		.delegations = DT_INST_PROP_OR(inst, riscv_delegation, NULL),          \
+		.num_delegations = DT_INST_PROP_LEN_OR(inst, riscv_delegation, 0),     \
+	};                                                                                         \
 	DEVICE_DT_INST_DEFINE(inst, aplic_init, NULL, &aplic_data_##inst, &aplic_cfg_##inst,       \
 			      PRE_KERNEL_1, CONFIG_INTC_INIT_PRIORITY, NULL);
 #endif
