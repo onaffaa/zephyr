@@ -116,7 +116,7 @@ void riscv_aia_set_priority(uint32_t irq, uint32_t prio)
 #endif
 }
 
-void riscv_aia_config_source(uint32_t irq, uint32_t mode)
+void riscv_aia_config_source(uint32_t irq, uint32_t src_cfg)
 {
 	const struct device *aplic = riscv_aplic_get_dev();
 	uint32_t src = riscv_aia_irq_to_src(irq);
@@ -125,7 +125,7 @@ void riscv_aia_config_source(uint32_t irq, uint32_t mode)
 		return;
 	}
 
-	riscv_aplic_config_src(aplic, src, mode);
+	riscv_aplic_config_src(aplic, src, src_cfg);
 }
 
 #ifdef CONFIG_RISCV_APLIC_MSI

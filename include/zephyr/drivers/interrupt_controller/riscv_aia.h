@@ -68,10 +68,11 @@ static inline const struct device *riscv_aia_get_dev(void)
 }
 
 /**
- * @brief Configure an APLIC source mode.
+ * @brief Configure an APLIC IRQ's sourcecfg register.
  *
  * @param irq Multi-level encoded interrupt ID.
- * @param mode Source mode (trigger type) per RISC-V AIA spec section 4.5.2.
+ * @param mode Source mode (trigger type) if delegate bit not set, child index otherwise per RISC-V
+ * AIA spec section 4.5.2.
  */
 void riscv_aia_config_source(uint32_t irq, uint32_t mode);
 

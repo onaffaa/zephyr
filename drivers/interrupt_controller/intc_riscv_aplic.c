@@ -43,7 +43,7 @@ int riscv_aplic_domain_enable(const struct device *dev, bool enable)
 	return 0;
 }
 
-int riscv_aplic_config_src(const struct device *dev, unsigned int src, unsigned int sm)
+int riscv_aplic_config_src(const struct device *dev, unsigned int src, unsigned int src_cfg)
 {
 	const struct aplic_cfg *cfg = dev->config;
 	struct aplic_data *data = dev->data;
@@ -51,18 +51,31 @@ int riscv_aplic_config_src(const struct device *dev, unsigned int src, unsigned 
 	if (src == 0 || src > cfg->num_sources) {
 		return -EINVAL;
 	}
-	/* Validate sm parameter - 0x2 and 0x3 are reserved (RISC-V AIA spec, section 4.5.2) */
-	if (sm == 0x2 || sm == 0x3 || (sm > APLIC_SM_LEVEL_LOW)) {
-		return -EINVAL;
-	}
-	uintptr_t off = aplic_sourcecfg_off(src);
-	k_spinlock_key_t key = k_spin_lock(&data->lock);
-	uint32_t v = rd32(cfg->base, off);
 
-	v &= ~APLIC_SOURCECFG_SM_MASK; /* Clear source mode field */
-	v |= (sm & APLIC_SOURCECFG_SM_MASK);
-	wr32(cfg->base, off, v);
-	k_spin_unlock(&data->lock, key);
+	/* Per RISC-V AIA spec, section 4.5.2 set sourcecfg based on whether the deletegate bit is
+	 * set */
+	uintptr_t off = aplic_sourcecfg_off(src);
+
+	if ((src_cfg & APLIC_SOURCECFG_D_BIT) == APLIC_SOURCECFG_D_BIT) {
+		/* Delegrate interrupt to specified child domain index */
+		k_spinlock_key_t key = k_spin_lock(&data->lock);
+
+		wr32(cfg->base, off,
+		     (APLIC_SOURCECFG_D_BIT | (src_cfg & APLIC_SOURCECFG_CHILD_INDEX_MASK)));
+		k_spin_unlock(&data->lock, key);
+	} else {
+		/* Validate sm parameter - 0x2 and 0x3 are reserved */
+		if (src_cfg == 0x2 || src_cfg == 0x3 || (src_cfg > APLIC_SM_LEVEL_LOW)) {
+			return -EINVAL;
+		}
+		k_spinlock_key_t key = k_spin_lock(&data->lock);
+		uint32_t v = rd32(cfg->base, off);
+
+		v &= ~APLIC_SOURCECFG_SM_MASK; /* Clear source mode field */
+		v |= (src_cfg & APLIC_SOURCECFG_SM_MASK);
+		wr32(cfg->base, off, v);
+		k_spin_unlock(&data->lock, key);
+	}
 	return 0;
 }
 

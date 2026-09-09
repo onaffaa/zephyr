@@ -107,21 +107,23 @@
  * @{
  */
 /** @brief Delegate bit position in sourcecfg */
-#define APLIC_SOURCECFG_D_BIT   10
-/** @brief Source mode field mask (bits 2:0) */
-#define APLIC_SOURCECFG_SM_MASK 0x7
+#define APLIC_SOURCECFG_D_BIT            10
+/** @brief Child index bitmask in sourcecfg (bits 9:0) when D_BIT = 1 */
+#define APLIC_SOURCECFG_CHILD_INDEX_MASK 0x3FF
+/** @brief Source mode field mask (bits 2:0) when D_BIT = 0 */
+#define APLIC_SOURCECFG_SM_MASK          0x7
 /** @brief Source mode: inactive */
-#define APLIC_SM_INACTIVE       0x0
+#define APLIC_SM_INACTIVE                0x0
 /** @brief Source mode: detached (delegated to child domain) */
-#define APLIC_SM_DETACHED       0x1
+#define APLIC_SM_DETACHED                0x1
 /** @brief Source mode: rising edge triggered */
-#define APLIC_SM_EDGE_RISE      0x4
+#define APLIC_SM_EDGE_RISE               0x4
 /** @brief Source mode: falling edge triggered */
-#define APLIC_SM_EDGE_FALL      0x5
+#define APLIC_SM_EDGE_FALL               0x5
 /** @brief Source mode: active high level triggered */
-#define APLIC_SM_LEVEL_HIGH     0x6
+#define APLIC_SM_LEVEL_HIGH              0x6
 /** @brief Source mode: active low level triggered */
-#define APLIC_SM_LEVEL_LOW      0x7
+#define APLIC_SM_LEVEL_LOW               0x7
 /** @} */
 
 /**
@@ -272,10 +274,10 @@ int riscv_aplic_domain_enable(const struct device *dev, bool enable);
  *
  * @param dev APLIC device
  * @param src Interrupt source number
- * @param sm Source mode (APLIC_SM_* values)
+ * @param src_cfg Source mode if delegate bit not set, child index if set
  * @return 0 on success, negative error code on failure
  */
-int riscv_aplic_config_src(const struct device *dev, unsigned int src, unsigned int sm);
+int riscv_aplic_config_src(const struct device *dev, unsigned int src, unsigned int src_cfg);
 
 /**
  * @brief Enable or disable an interrupt source
