@@ -1348,6 +1348,14 @@ def inc_dec(kconf, name, *args):
         assert False
 
 
+def string_if(kconf, _, condition, string, default=''):
+    """
+    Returns the given string if the given condition is met, otherwise returns the 
+    default.
+    """
+    return string if condition and condition != "n" else default
+
+
 # Keys in this dict are the function names as they appear
 # in Kconfig files. The values are tuples in this form:
 #
@@ -1434,4 +1442,5 @@ functions = {
         "inc_hex": (inc_dec, 1, 255),
         "dec": (inc_dec, 1, 255),
         "dec_hex": (inc_dec, 1, 255),
+        "string_if": (string_if, 2, 3)
 }
