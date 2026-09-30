@@ -29,6 +29,7 @@ from kconfiglib import (
     AND,
     BOOL,
     OR,
+    STR_TO_TRI,
     TRI_TO_STR,
     TRISTATE,
     TYPE_TO_STR,
@@ -93,10 +94,10 @@ def main():
         check_assigned_sym_values(kconf)
         check_assigned_choice_values(kconf)
 
-    if kconf.syms.get('WARN_DEPRECATED', kconf.y).tri_value == 2:
+    if kconf.syms.get('WARN_DEPRECATED', kconf.y).tri_value == STR_TO_TRI["y"]:
         check_deprecated(kconf)
 
-    if kconf.syms.get('WARN_EXPERIMENTAL', kconf.y).tri_value == 2:
+    if kconf.syms.get('WARN_EXPERIMENTAL', kconf.y).tri_value == STR_TO_TRI["y"]:
         check_experimental(kconf)
 
     check_not_secure(kconf)
@@ -230,7 +231,7 @@ def missing_deps(sym):
     if sym.type in (BOOL, TRISTATE):
         return [dep for dep in deps if expr_value(dep) < sym.user_value]
     # string/int/hex
-    return [dep for dep in deps if expr_value(dep) == 0]
+    return [dep for dep in deps if expr_value(dep) == STR_TO_TRI["n"]]
 
 
 def check_assigned_choice_values(kconf):
@@ -272,13 +273,13 @@ def check_deprecated(kconf):
     dep_expr = kconf.n if deprecated is None else deprecated.rev_dep
 
     if dep_expr is not kconf.n:
-        selectors = [s for s in split_expr(dep_expr, OR) if expr_value(s) == 2]
+        selectors = [s for s in split_expr(dep_expr, OR) if expr_value(s) == STR_TO_TRI["y"]]
         for selector in selectors:
             selector_name = split_expr(selector, AND)[0].name
             warn(f'Deprecated symbol {selector_name} is enabled.')
 
         if (
-            kconf.syms.get('DEPRECATED_KCONFIGS_AS_ERRORS', kconf.y).tri_value == 2
+            kconf.syms.get('DEPRECATED_KCONFIGS_AS_ERRORS', kconf.y).tri_value == STR_TO_TRI["y"]
             and len(selectors) > 0
         ):
             err("Aborting due to Kconfig deprecation warnings")
@@ -289,7 +290,7 @@ def check_experimental(kconf):
     dep_expr = kconf.n if experimental is None else experimental.rev_dep
 
     if dep_expr is not kconf.n:
-        selectors = [s for s in split_expr(dep_expr, OR) if expr_value(s) == 2]
+        selectors = [s for s in split_expr(dep_expr, OR) if expr_value(s) == STR_TO_TRI["y"]]
         for selector in selectors:
             selector_name = split_expr(selector, AND)[0].name
             warn(f'Experimental symbol {selector_name} is enabled.')
@@ -300,7 +301,7 @@ def check_not_secure(kconf):
     dep_expr = kconf.n if not_secure is None else not_secure.rev_dep
 
     if dep_expr is not kconf.n:
-        selectors = [s for s in split_expr(dep_expr, OR) if expr_value(s) == 2]
+        selectors = [s for s in split_expr(dep_expr, OR) if expr_value(s) == STR_TO_TRI["y"]]
         for selector in selectors:
             selector_name = split_expr(selector, AND)[0].name
             warn(f'Not secure symbol {selector_name} is enabled.')
