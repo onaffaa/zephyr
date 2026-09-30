@@ -23,6 +23,8 @@ import re
 import sys
 import textwrap
 
+import sysinitgen
+
 # Zephyr doesn't use tristate symbols. They're supported here just to make the
 # script a bit more generic.
 from kconfiglib import (
@@ -93,6 +95,8 @@ def main():
         # when using an old configuration and updating Kconfig files.
         check_assigned_sym_values(kconf)
         check_assigned_choice_values(kconf)
+
+    assign_sys_init_prios(kconf)
 
     if kconf.syms.get('WARN_DEPRECATED', kconf.y).tri_value == STR_TO_TRI["y"]:
         check_deprecated(kconf)
@@ -165,6 +169,17 @@ user-configurable (has no prompt). It gets its value indirectly from other
 symbols. """
                 + SYM_INFO_HINT.format(sym)
             )
+
+
+def assign_sys_init_prios(kconf):
+    # Functionality to assign SYS_INIT priorities programmatically where
+    # configs with the suffix "SYS_INIT_GEN" are ordered according to
+    # their "depends on" property.
+    DEFAULT_LEVEL = "POST_KERNEL"
+
+    sys_init_symbol_set = sysinitgen.SysInitSet(kconf, DEFAULT_LEVEL, warn, err)
+    sys_init_symbol_set.resolve_prios()
+    sys_init_symbol_set.print_report()
 
 
 def check_assigned_sym_values(kconf):

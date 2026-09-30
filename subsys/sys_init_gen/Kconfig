@@ -1,0 +1,71 @@
+config SYS_INIT_GEN_APPLICATION_PRE
+	int
+	default 40
+	help
+	    Represents priority preceeding the range used by sys_init generation at APPLICATION level
+
+config SYS_INIT_GEN_APPLICATION_POST
+	int
+	default 60
+	help
+	    Represents priority proceeding the range used by sys_init generation at APPLICATION level
+
+config SYS_INIT_GEN_EARLY_PRE
+	int
+	default 40
+	help
+	    Represents priority preceeding the range used by sys_init generation at EARLY level
+
+config SYS_INIT_GEN_EARLY_POST
+	int
+	default 60
+	help
+	    Represents priority proceeding the range used by sys_init generation at EARLY level
+
+config SYS_INIT_GEN_PRE_KERNEL_1_PRE
+	int
+	default 40
+	help
+	    Represents priority preceeding the range used by sys_init generation at PRE_KERNEL_1 level
+
+config SYS_INIT_GEN_PRE_KERNEL_1_POST
+	int
+	default 60
+	help
+	    Represents priority proceeding the range used by sys_init generation at PRE_KERNEL_1 level
+
+config SYS_INIT_GEN_PRE_KERNEL_2_PRE
+	int
+	default 40
+	help
+	    Represents priority preceeding the range used by sys_init generation at PRE_KERNEL_2 level
+
+config SYS_INIT_GEN_PRE_KERNEL_2_POST
+	int
+	default 60
+	help
+	    Represents priority proceeding the range used by sys_init generation at PRE_KERNEL_2 level
+
+config SYS_INIT_GEN_POST_KERNEL_PRE
+	int
+	default 70
+	help
+	    Represents priority preceeding the range used by sys_init generation at POST_KERNEL level
+
+config SYS_INIT_GEN_POST_KERNEL_POST
+	int
+	default 90
+	help
+	    Represents priority proceeding the range used by sys_init generation at POST_KERNEL level
+
+config SYS_INIT_GEN_SMP_PRE
+	int
+	default 40
+	help
+	    Represents priority preceeding the range used by sys_init generation at SMP level
+
+config SYS_INIT_GEN_SMP_POST
+	int
+	default 60
+	help
+	    Represents priority proceeding the range used by sys_init generation at SMP level
