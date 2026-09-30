@@ -397,6 +397,6 @@ static DEVICE_API(gpio, pcf857x_drv_api) = {
 		.num_bytes = DT_INST_ENUM_IDX(idx, ngpios) + 1,                                    \
 	};                                                                                         \
 	DEVICE_DT_INST_DEFINE(idx, pcf857x_init, NULL, &pcf857x_data##idx, &pcf857x_cfg##idx,      \
-			      POST_KERNEL, CONFIG_GPIO_PCF857X_INIT_PRIORITY, &pcf857x_drv_api);
+			      POST_KERNEL, CONFIG_GPIO_PCF857X_SYS_INIT_GEN_PRIO, &pcf857x_drv_api);
 
 DT_INST_FOREACH_STATUS_OKAY(GPIO_PCF857X_INST);

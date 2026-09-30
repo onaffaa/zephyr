@@ -11,11 +11,12 @@ config GPIO_AXP192
 	help
 	  Enable the AXP192 GPIO driver.
 
-config GPIO_AXP192_INIT_PRIORITY
-	int "AXP192 GPIO driver initialization priority"
+config GPIO_AXP192_SYS_INIT_GEN
+	bool
+	default y
 	depends on GPIO_AXP192
-	default 81
+	depends on MFD_AXP192_SYS_INIT_GEN
 	help
-	  Initialization priority for the AXP192 GPIO driver. It must be
-	  greater than the I2C controller init priority and the mfd driver
-	  init priority.
+	  Enables generation of a SYS_INIT priority for the AXP192 GPIO driver
+	  via subsys/sys_init_gen, based on this symbol's Kconfig dependencies.
+	  Must be initialized after the AXP192 MFD driver.

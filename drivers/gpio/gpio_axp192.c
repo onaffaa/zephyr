@@ -312,6 +312,6 @@ static int gpio_axp192_init(const struct device *dev)
                                                                                                    \
 	DEVICE_DT_INST_DEFINE(inst, gpio_axp192_init, NULL, &gpio_axp192_data##inst,               \
 			      &gpio_axp192_config##inst, POST_KERNEL,                              \
-			      CONFIG_GPIO_AXP192_INIT_PRIORITY, &gpio_axp192_api);
+			      CONFIG_GPIO_AXP192_SYS_INIT_GEN_PRIO, &gpio_axp192_api);
 
 DT_INST_FOREACH_STATUS_OKAY(GPIO_AXP192_DEFINE)

@@ -13,9 +13,10 @@ menuconfig GPIO_PCF857X
 	help
 	  Enable driver for PCF857X I2C GPIO chip.
 
-config GPIO_PCF857X_INIT_PRIORITY
-	int "Init priority"
-	default I2C_INIT_PRIORITY
+config GPIO_PCF857X_SYS_INIT_GEN
+	bool
+	default y
 	depends on GPIO_PCF857X
 	help
-	  Device driver initialization priority.
+	  Enables generation of a SYS_INIT priority for the PCF857X driver via
+	  subsys/sys_init_gen, based on this symbol's Kconfig dependencies.

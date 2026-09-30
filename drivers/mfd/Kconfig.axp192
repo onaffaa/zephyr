@@ -8,3 +8,11 @@ config MFD_AXP192
 	select I2C
 	help
 	  Enable the X-Powers AXP192 PMIC multi-function device driver
+
+config MFD_AXP192_SYS_INIT_GEN
+	bool
+	default y
+	depends on MFD_AXP192
+	help
+	  Enables generation of a SYS_INIT priority for the AXP192 MFD driver
+	  via subsys/sys_init_gen, based on this symbol's Kconfig dependencies.
