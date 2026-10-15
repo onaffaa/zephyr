@@ -40,7 +40,34 @@ properties:
       When present the driver operates in MSI mode; when absent
       direct delivery mode is assumed.
 
+  riscv,children:
+    type: phandles
+    description: |
+      Child APLIC domains of this domain. The position of a child in this
+      list is its child index in the sourcecfg registers of this domain.
+
+  riscv,delegation:
+    type: phandle-array
+    specifier-space: aplic-delegation
+    description: |
+      Interrupt sources delegated to child domains at initialization. Each
+      entry is a child domain phandle followed by the first and last source
+      number of the delegated range in this domain. Every child domain
+      referenced here must be listed in riscv,children and have
+      #aplic-delegation-cells = <2>.
+
+  "#aplic-delegation-cells":
+    type: int
+    const: 2
+    description: |
+      Number of cells in a riscv,delegation specifier. Required in child
+      domains that a parent delegates sources to.
+
 interrupt-cells:
   - irq
   - priority
   - flags
+
+aplic-delegation-cells:
+  - first-source
+  - last-source

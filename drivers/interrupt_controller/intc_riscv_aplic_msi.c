@@ -130,6 +130,8 @@ int aplic_msi_init(const struct device *dev)
 		wr32(cfg->base, APLIC_SMSIADDRCFGH, msi_geom);
 	}
 
+	aplic_apply_delegation(dev);
+
 	/* Enable MSI mode + IE in DOMAINCFG */
 	riscv_aplic_domain_enable(dev, true);
 

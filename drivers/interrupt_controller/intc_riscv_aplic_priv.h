@@ -17,9 +17,18 @@
 
 typedef void (*riscv_aplic_irq_config_func_t)(void);
 
+/** Range of sources delegated to one child domain */
+struct aplic_delegation {
+	uint16_t child;
+	uint16_t first;
+	uint16_t last;
+};
+
 struct aplic_cfg {
 	uintptr_t base;
 	uint32_t num_sources;
+	const struct aplic_delegation *delegations;
+	size_t num_delegations;
 #ifdef CONFIG_RISCV_APLIC_MSI
 	uint32_t imsic_addr;
 #endif
@@ -43,6 +52,13 @@ static inline void wr32(uintptr_t base, uint32_t off, uint32_t v)
 {
 	sys_write32(v, base + off);
 }
+
+/**
+ * @brief Delegate the source ranges listed in riscv,delegation to child domains.
+ *
+ * @param dev APLIC device
+ */
+void aplic_apply_delegation(const struct device *dev);
 
 #ifdef CONFIG_RISCV_APLIC_MSI
 /**
