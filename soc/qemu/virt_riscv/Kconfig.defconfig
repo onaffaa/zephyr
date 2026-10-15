@@ -20,6 +20,7 @@ config MAX_IRQ_PER_AGGREGATOR
 	default 1024
 
 config NUM_IRQS
+	default 2060 if $(dt_compat_enabled_num,$(DT_COMPAT_RISCV_APLIC)) = 2
 	default 1036
 
 config PMP_SLOTS
