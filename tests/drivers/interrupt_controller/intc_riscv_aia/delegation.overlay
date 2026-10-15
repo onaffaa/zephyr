@@ -1,0 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: Copyright The Zephyr Project Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/* Delegate sources 60-63 of the root APLIC domain to the supervisor domain */
+&aplic {
+	riscv,delegation = <&aplic_s 60 63>;
+};

@@ -10,3 +10,6 @@ target_sources(app PRIVATE src/main.c)
 # Delivery-mode-specific tests
 target_sources_ifdef(CONFIG_RISCV_APLIC_MSI app PRIVATE src/aplic_msi_imsic.c)
 target_sources_ifdef(CONFIG_RISCV_APLIC_DIRECT app PRIVATE src/aplic_direct.c)
+
+# Domain delegation tests, empty unless the root APLIC has riscv,delegation
+target_sources(app PRIVATE src/aplic_delegation.c)

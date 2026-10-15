@@ -1,0 +1,11 @@
+/*
+ * SPDX-FileCopyrightText: Copyright The Zephyr Project Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/* Run the supervisor domain in direct mode on hart 0's supervisor external interrupt */
+&aplic_s {
+	riscv,max-priority = <3>;
+	interrupts-extended = <&hlic0 0x09>;
+	status = "okay";
+};

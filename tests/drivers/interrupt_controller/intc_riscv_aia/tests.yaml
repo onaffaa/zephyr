@@ -23,3 +23,18 @@ common:
 
 tests:
   drivers.interrupt_controller.intc_riscv_aia: {}
+  drivers.interrupt_controller.intc_riscv_aia.delegation:
+    extra_args:
+      - EXTRA_DTC_OVERLAY_FILE="delegation.overlay"
+  drivers.interrupt_controller.intc_riscv_aia.delegation.direct_child:
+    # delegation_direct.overlay enables the child domain without msi-parent
+    platform_allow:
+      - qemu_riscv32/qemu_virt_riscv32/aia-direct
+      - qemu_riscv32/qemu_virt_riscv32/aia-direct/smp
+    integration_platforms:
+      - qemu_riscv32/qemu_virt_riscv32/aia-direct
+    extra_args:
+      - EXTRA_DTC_OVERLAY_FILE="delegation.overlay;delegation_direct.overlay"
+    extra_configs:
+      - CONFIG_NUM_2ND_LEVEL_AGGREGATORS=2
+      - CONFIG_2ND_LVL_INTR_01_OFFSET=9
