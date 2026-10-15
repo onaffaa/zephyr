@@ -23,7 +23,20 @@
 		interrupt-controller;
 		#address-cells = <0>;
 		#interrupt-cells = <3>;
+		riscv,children = <&aplic_s>;
 		status = "okay";
+	};
+
+	/* Supervisor-level child domain of aplic, as created by QEMU -machine virt,aia=... */
+	aplic_s: interrupt-controller@d000000 {
+		compatible = "riscv,aplic";
+		reg = <0x0d000000 0x00008000>;
+		riscv,num-sources = <64>;
+		interrupt-controller;
+		#address-cells = <0>;
+		#interrupt-cells = <3>;
+		#aplic-delegation-cells = <2>;
+		status = "disabled";
 	};
 };
 
