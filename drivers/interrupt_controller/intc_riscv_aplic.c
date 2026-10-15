@@ -155,6 +155,9 @@ uint32_t riscv_aplic_get_num_sources(const struct device *dev)
 #define APLIC_INIT(inst)                                                                           \
 	BUILD_ASSERT(DT_INST_NODE_HAS_PROP(inst, riscv_max_priority),                              \
 		     "max_prio is required for APLIC direct-delivery mode but is not present");    \
+	BUILD_ASSERT(INTC_INST_ISR_TBL_OFFSET(inst) + CONFIG_MAX_IRQ_PER_AGGREGATOR <=             \
+			     CONFIG_NUM_IRQS,                                                      \
+		     "CONFIG_NUM_IRQS too small for all APLIC domains");                           \
 	IRQ_PARENT_ENTRY_DEFINE(aplic##inst, DEVICE_DT_INST_GET(inst), DT_INST_IRQN(inst),         \
 				INTC_INST_ISR_TBL_OFFSET(inst),                                    \
 				DT_INST_INTC_GET_AGGREGATOR_LEVEL(inst));                          \

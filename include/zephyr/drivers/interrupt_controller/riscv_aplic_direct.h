@@ -33,11 +33,12 @@ void riscv_aplic_direct_mode_enable(const struct device *dev, bool enable);
 /**
  * @brief Check if a riscv APLIC-specific interrupt line is enabled
  *
+ * @param dev APLIC device
  * @param local_irq Local IRQ number to check
  *
  * @return 1 if enabled, 0 otherwise
  */
-int riscv_aplic_is_enabled(uint32_t local_irq);
+int riscv_aplic_is_enabled(const struct device *dev, uint32_t local_irq);
 
 /**
  * @brief Configure the priority for a specified interrupt source

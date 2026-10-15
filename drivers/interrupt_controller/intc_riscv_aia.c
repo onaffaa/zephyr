@@ -27,13 +27,31 @@
 #include <zephyr/logging/log.h>
 #include <zephyr/sw_isr_table.h>
 
+#include "sw_isr_common.h"
+
 LOG_MODULE_REGISTER(intc_riscv_aia, CONFIG_LOG_DEFAULT_LEVEL);
+
+#ifdef CONFIG_RISCV_APLIC_MSI
+/* MSI mode supports a single APLIC domain whose sources map 1:1 to IMSIC EIIDs */
+BUILD_ASSERT(DT_NUM_INST_STATUS_OKAY(riscv_aplic) == 1,
+	     "APLIC MSI delivery mode supports one enabled APLIC domain");
 
 #define APLIC_NODE             DT_COMPAT_GET_ANY_STATUS_OKAY(riscv_aplic)
 #define APLIC_ISR_TABLE_OFFSET INTC_BASE_ISR_TBL_OFFSET(APLIC_NODE)
 
 IRQ_PARENT_ENTRY_DEFINE(riscv_aia, DEVICE_DT_GET(APLIC_NODE), DT_IRQN(APLIC_NODE),
 			APLIC_ISR_TABLE_OFFSET, DT_INTC_GET_AGGREGATOR_LEVEL(APLIC_NODE));
+#endif
+
+/* Direct mode registers one parent entry per APLIC domain, keyed on its hart interrupt */
+static inline const struct device *riscv_aia_irq_to_aplic(uint32_t irq)
+{
+	if (IS_ENABLED(CONFIG_RISCV_APLIC_DIRECT)) {
+		return z_get_sw_isr_device_from_irq(irq);
+	}
+
+	return riscv_aplic_get_dev();
+}
 
 static inline uint32_t riscv_aia_irq_to_src(uint32_t irq)
 {
@@ -47,7 +65,7 @@ static bool riscv_aia_src_is_valid(const struct device *aplic, uint32_t src)
 
 void riscv_aia_irq_enable(uint32_t irq)
 {
-	const struct device *aplic = riscv_aplic_get_dev();
+	const struct device *aplic = riscv_aia_irq_to_aplic(irq);
 	uint32_t src = riscv_aia_irq_to_src(irq);
 
 	__ASSERT_NO_MSG(riscv_aia_src_is_valid(aplic, src));
@@ -64,7 +82,7 @@ void riscv_aia_irq_enable(uint32_t irq)
 
 void riscv_aia_irq_disable(uint32_t irq)
 {
-	const struct device *aplic = riscv_aplic_get_dev();
+	const struct device *aplic = riscv_aia_irq_to_aplic(irq);
 	uint32_t src = riscv_aia_irq_to_src(irq);
 
 	__ASSERT_NO_MSG(riscv_aia_src_is_valid(aplic, src));
@@ -78,14 +96,15 @@ void riscv_aia_irq_disable(uint32_t irq)
 
 int riscv_aia_irq_is_enabled(uint32_t irq)
 {
+	const struct device *aplic = riscv_aia_irq_to_aplic(irq);
 	uint32_t src = riscv_aia_irq_to_src(irq);
 
-	__ASSERT_NO_MSG(riscv_aia_src_is_valid(riscv_aplic_get_dev(), src));
+	__ASSERT_NO_MSG(riscv_aia_src_is_valid(aplic, src));
 
 #ifdef CONFIG_RISCV_IMSIC
 	return riscv_imsic_is_enabled(src);
 #else
-	return riscv_aplic_is_enabled(src);
+	return riscv_aplic_is_enabled(aplic, src);
 #endif
 }
 
@@ -103,7 +122,7 @@ void riscv_aia_set_priority(uint32_t irq, uint32_t prio)
 			prio);
 	}
 #else
-	const struct device *aplic = riscv_aplic_get_dev();
+	const struct device *aplic = riscv_aia_irq_to_aplic(irq);
 
 	riscv_aplic_set_priority(aplic, src, prio);
 #endif
@@ -111,7 +130,7 @@ void riscv_aia_set_priority(uint32_t irq, uint32_t prio)
 
 void riscv_aia_config_source(uint32_t irq, uint32_t mode)
 {
-	const struct device *aplic = riscv_aplic_get_dev();
+	const struct device *aplic = riscv_aia_irq_to_aplic(irq);
 	uint32_t src = riscv_aia_irq_to_src(irq);
 
 	__ASSERT_NO_MSG(riscv_aia_src_is_valid(aplic, src));
@@ -138,7 +157,7 @@ void riscv_aia_inject_msi(uint32_t hart, uint32_t eiid)
 #ifdef CONFIG_RISCV_APLIC_DIRECT_IRQ_AFFINITY
 void riscv_aia_route_to_hart(uint32_t irq, uint32_t hart)
 {
-	const struct device *aplic = riscv_aplic_get_dev();
+	const struct device *aplic = riscv_aia_irq_to_aplic(irq);
 	uint32_t src = riscv_aia_irq_to_src(irq);
 
 	if (!riscv_aia_src_is_valid(aplic, src)) {
@@ -154,6 +173,7 @@ void riscv_aia_enable_source(uint32_t irq)
 	riscv_aia_irq_enable(irq);
 }
 
+#ifdef CONFIG_RISCV_APLIC_MSI
 void riscv_aia_dispatch_eiid(uint32_t eiid)
 {
 	const struct device *aplic = riscv_aplic_get_dev();
@@ -167,3 +187,4 @@ void riscv_aia_dispatch_eiid(uint32_t eiid)
 	ite = &_sw_isr_table[APLIC_ISR_TABLE_OFFSET + eiid];
 	ite->isr(ite->arg);
 }
+#endif /* CONFIG_RISCV_APLIC_MSI */

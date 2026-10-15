@@ -62,9 +62,8 @@ void riscv_aplic_direct_mode_enable(const struct device *dev, bool enable)
 	k_spin_unlock(&data->lock, key);
 }
 
-int riscv_aplic_is_enabled(uint32_t local_irq)
+int riscv_aplic_is_enabled(const struct device *dev, uint32_t local_irq)
 {
-	const struct device *dev = riscv_aplic_get_dev();
 	const struct aplic_cfg *cfg = dev->config;
 
 	__ASSERT_NO_MSG(IN_RANGE(local_irq, 1, cfg->num_sources));
