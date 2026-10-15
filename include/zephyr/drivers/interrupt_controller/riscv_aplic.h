@@ -106,9 +106,11 @@
  * Bit field definitions for source configuration registers.
  * @{
  */
-/** @brief Delegate bit position in sourcecfg */
-#define APLIC_SOURCECFG_D_BIT   10
-/** @brief Source mode field mask (bits 2:0) */
+/** @brief Delegate bit in sourcecfg */
+#define APLIC_SOURCECFG_D       BIT(10)
+/** @brief Child index field mask (bits 9:0), valid when D = 1 */
+#define APLIC_SOURCECFG_CI_MASK BIT_MASK(10)
+/** @brief Source mode field mask (bits 2:0), valid when D = 0 */
 #define APLIC_SOURCECFG_SM_MASK 0x7
 /** @brief Source mode: inactive */
 #define APLIC_SM_INACTIVE       0x0
