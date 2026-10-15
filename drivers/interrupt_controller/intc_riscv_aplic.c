@@ -44,21 +44,24 @@ void riscv_aplic_domain_enable(const struct device *dev, bool enable)
 void riscv_aplic_config_src(const struct device *dev, unsigned int src, unsigned int sm)
 {
 	const struct aplic_cfg *cfg = dev->config;
-	struct aplic_data *data = dev->data;
 
 	__ASSERT_NO_MSG(IN_RANGE(src, 1, cfg->num_sources));
 
 	/* Validate sm parameter - 0x2 and 0x3 are reserved (RISC-V AIA spec, section 4.5.2) */
 	__ASSERT_NO_MSG((sm != 0x2 && sm != 0x3 && sm <= APLIC_SM_LEVEL_LOW));
 
-	uintptr_t off = aplic_sourcecfg_off(src);
-	k_spinlock_key_t key = k_spin_lock(&data->lock);
-	uint32_t v = rd32(cfg->base, off);
+	/* D = 0: the remaining bits hold only the source mode */
+	wr32(cfg->base, aplic_sourcecfg_off(src), sm & APLIC_SOURCECFG_SM_MASK);
+}
 
-	v &= ~APLIC_SOURCECFG_SM_MASK; /* Clear source mode field */
-	v |= (sm & APLIC_SOURCECFG_SM_MASK);
-	wr32(cfg->base, off, v);
-	k_spin_unlock(&data->lock, key);
+void riscv_aplic_delegate_src(const struct device *dev, unsigned int src, unsigned int child)
+{
+	const struct aplic_cfg *cfg = dev->config;
+
+	__ASSERT_NO_MSG(IN_RANGE(src, 1, cfg->num_sources));
+	__ASSERT_NO_MSG(child <= APLIC_SOURCECFG_CI_MASK);
+
+	wr32(cfg->base, aplic_sourcecfg_off(src), APLIC_SOURCECFG_D | child);
 }
 
 void riscv_aplic_enable_src(const struct device *dev, unsigned int src, bool enable)

@@ -269,13 +269,26 @@ void riscv_aplic_domain_enable(const struct device *dev, bool enable);
 /**
  * @brief Configure an interrupt source mode
  *
- * Sets the trigger mode for an interrupt source (edge/level, polarity).
+ * Sets the trigger mode for an interrupt source (edge/level, polarity) and clears any
+ * delegation of the source to a child domain.
  *
  * @param dev APLIC device
  * @param src Interrupt source number
  * @param sm Source mode (APLIC_SM_* values)
  */
 void riscv_aplic_config_src(const struct device *dev, unsigned int src, unsigned int sm);
+
+/**
+ * @brief Delegate an interrupt source to a child domain
+ *
+ * Sets the delegate bit and child index in the source's sourcecfg register. The source is
+ * then inactive in this domain and is configured through the child domain.
+ *
+ * @param dev APLIC device
+ * @param src Interrupt source number
+ * @param child Index of the child domain in this domain's riscv,children list
+ */
+void riscv_aplic_delegate_src(const struct device *dev, unsigned int src, unsigned int child);
 
 /**
  * @brief Enable or disable an interrupt source
