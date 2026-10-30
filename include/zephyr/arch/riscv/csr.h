@@ -121,6 +121,7 @@
 #define COUNTEREN_CY	(1 << 0)	/* cycle counter */
 #define COUNTEREN_TM	(1 << 1)	/* time counter */
 #define COUNTEREN_IR	(1 << 2)	/* instret counter */
+#define COUNTEREN_HPM	(0xFFFFFFF8)	/* hpmcounter3-hpmcounter31 */
 
 #define PRV_U	0
 #define PRV_S	1

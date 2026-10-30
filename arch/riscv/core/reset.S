@@ -181,6 +181,12 @@ aa_loop:
 	li t0, (COUNTEREN_CY | COUNTEREN_TM | COUNTEREN_IR)
 	csrw mcounteren, t0
 
+#ifdef CONFIG_RISCV_USER_HPM_COUNTER_ACCESS
+	/* Allow S-mode to read the HPM counters */
+	li t0, COUNTEREN_HPM
+	csrs mcounteren, t0
+#endif /* CONFIG_RISCV_USER_HPM_COUNTER_ACCESS */
+
 #ifdef CONFIG_RISCV_ISA_EXT_ZKR
 	/* Allow S-mode to access the Zkr seed CSR */
 	li t0, MSECCFG_SSEED

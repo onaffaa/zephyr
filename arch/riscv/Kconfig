@@ -444,6 +444,24 @@ config RISCV_USER_COUNTER_ACCESS
 	  that user threads can read the Zicntr counters directly instead of
 	  taking an illegal instruction exception.
 
+config RISCV_USER_HPM_COUNTER_ACCESS
+	bool "User-mode access to the Zihpm counters"
+	depends on RISCV_USER_COUNTER_ACCESS
+	depends on RISCV_ISA_EXT_ZIHPM
+	help
+	  Set the HPM bits (hpmcounter3-hpmcounter31) in mcounteren, and
+	  in scounteren where present, so that user threads can read the
+	  hardware performance counters directly.
+
+	  This option is disabled by default. Events such as cache misses or
+	  branch mispredictions let an unprivileged thread observe the
+	  activity of other threads and of the kernel, which can be used as
+	  a side channel. Enable it only when user threads are trusted to
+	  observe system-wide microarchitectural activity.
+
+	  With an external SBI, mcounteren is owned by the SBI firmware,
+	  which must also grant S-mode access to these counters.
+
 config RISCV_PMP
 	bool "RISC-V PMP Support"
 	depends on !RISCV_S_MODE

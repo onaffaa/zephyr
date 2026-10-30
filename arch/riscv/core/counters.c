@@ -16,6 +16,10 @@ void z_riscv_counteren_init(void)
 {
 	unsigned long bits = COUNTEREN_CY | COUNTEREN_TM | COUNTEREN_IR;
 
+	if (IS_ENABLED(CONFIG_RISCV_USER_HPM_COUNTER_ACCESS)) {
+		bits |= COUNTEREN_HPM;
+	}
+
 #ifdef CONFIG_RISCV_S_MODE
 	/*
 	 * mcounteren is the SBI's. The built-in one sets it in reset.S.
