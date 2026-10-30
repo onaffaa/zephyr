@@ -67,6 +67,10 @@ if(CONFIG_RISCV_ISA_EXT_ZIFENCEI)
   string(APPEND riscv_march "_zifencei")
 endif()
 
+if(CONFIG_RISCV_ISA_EXT_ZIHPM)
+  string(APPEND riscv_march "_zihpm")
+endif()
+
 if(CONFIG_RISCV_ISA_EXT_ZK)
     string(APPEND riscv_march  "_zk")
 endif()

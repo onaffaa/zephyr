@@ -134,6 +134,17 @@ config RISCV_ISA_EXT_ZICNTR
 	  which have dedicated functions (cycle count, real-time clock and instructions retired,
 	  respectively).
 
+config RISCV_ISA_EXT_ZIHPM
+	bool
+	default y if $(dt_compat_all_has_prop,riscv,$(RISCV_ISA_EXT_PROP),zihpm)
+	depends on RISCV_ISA_EXT_ZICSR
+	help
+	  (Zihpm) - Standard Extension for Hardware Performance Counters
+
+	  The Zihpm standard extension comprises up to 29 additional unprivileged 64-bit
+	  hardware performance counters (HPMCOUNTER3-HPMCOUNTER31), whose events are
+	  platform-specific.
+
 config RISCV_ISA_EXT_ZICSR
 	bool
 	default y if $(dt_compat_all_has_prop,riscv,$(RISCV_ISA_EXT_PROP),zicsr)
