@@ -5567,6 +5567,7 @@ RISCV Platforms:
     - lstnl
     - meijemac
     - AFOliveira
+    - onaffaa
   files:
     - boards/enjoydigital/litex_vexriscv/
     - boards/lowrisc/opentitan_earlgrey/
