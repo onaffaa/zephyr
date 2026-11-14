@@ -5576,6 +5576,7 @@ RISCV Platforms:
     - boards/starfive/
     - dts/bindings/riscv/
     - dts/riscv/
+    - soc/qemu/virt_riscv/
   labels:
     - "platforms: RISCV"
 
